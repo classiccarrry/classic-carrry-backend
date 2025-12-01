@@ -34,26 +34,35 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-// CORS configuration - Allow multiple origins
-const allowedOrigins = [
-  'http://localhost:5173',  // Local dev - admin
-  'http://localhost:5174',  // Local dev - user
-  process.env.ADMIN_URL,    // Production admin panel
-  process.env.USER_URL      // Production user website
-].filter(Boolean);
-
+// CORS configuration - Allow only Vercel deployments
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // Allow requests with no origin (like mobile apps, Postman, curl)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    // Allow Vercel deployments only
+    if (origin.includes('.vercel.app')) {
+      return callback(null, true);
     }
+    
+    // Allow custom domains from environment variables
+    const allowedDomains = [
+      process.env.ADMIN_URL,
+      process.env.USER_URL,
+    ].filter(Boolean);
+    
+    if (allowedDomains.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    // Reject all other origins
+    callback(new Error('Not allowed by CORS'));
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 86400 // 24 hours
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
