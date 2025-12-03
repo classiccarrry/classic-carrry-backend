@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import { v2 as cloudinary } from 'cloudinary';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import CloudinaryStoragePkg from 'multer-storage-cloudinary';
 import multer from 'multer';
 
 // Load environment variables
@@ -14,7 +14,7 @@ cloudinary.config({
 });
 
 // Configure Cloudinary storage for multer
-const storage = new CloudinaryStorage({
+const storage = new CloudinaryStoragePkg({
   cloudinary: cloudinary,
   params: {
     folder: 'classic-carrry',
