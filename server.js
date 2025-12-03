@@ -34,13 +34,13 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-// CORS configuration - Allow only Vercel deployments
+// CORS configuration - Allow Vercel and custom domains
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps, Postman, curl)
     if (!origin) return callback(null, true);
     
-    // Allow Vercel deployments only
+    // Allow Vercel deployments
     if (origin.includes('.vercel.app')) {
       return callback(null, true);
     }

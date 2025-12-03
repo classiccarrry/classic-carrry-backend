@@ -3,12 +3,38 @@ import nodemailer from 'nodemailer';
 
 // Create email transporter
 const createTransporter = () => {
+  // Try multiple Gmail configurations
+  // First try port 465 (SSL), fallback to port 587 (TLS)
+  const usePort465 = process.env.USE_GMAIL_SSL === 'true';
+  
+  if (usePort465) {
+    return nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
+      tls: {
+        rejectUnauthorized: false
+      }
+    });
+  }
+  
+  // Default: Use service shorthand (tries multiple ports automatically)
   return nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS
-    }
+    },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000
   });
 };
 
@@ -35,6 +61,10 @@ export const submitContact = async (req, res) => {
 
     // Send confirmation email to user
     try {
+      console.log('📧 Attempting to send email...');
+      console.log('EMAIL_USER:', process.env.EMAIL_USER ? 'Set ✓' : 'Missing ✗');
+      console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? 'Set ✓' : 'Missing ✗');
+      
       const transporter = createTransporter();
       
       const userMailOptions = {
@@ -73,8 +103,10 @@ export const submitContact = async (req, res) => {
       };
 
       await transporter.sendMail(userMailOptions);
+      console.log('✅ Confirmation email sent successfully to:', email);
     } catch (emailError) {
-      console.error('Error sending confirmation email:', emailError);
+      console.error('❌ Error sending confirmation email:', emailError.message);
+      console.error('Full error:', emailError);
       // Don't fail the request if email fails
     }
 
