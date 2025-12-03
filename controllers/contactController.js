@@ -3,38 +3,25 @@ import nodemailer from 'nodemailer';
 
 // Create email transporter
 const createTransporter = () => {
-  // Try multiple Gmail configurations
-  // First try port 465 (SSL), fallback to port 587 (TLS)
-  const usePort465 = process.env.USE_GMAIL_SSL === 'true';
-  
-  if (usePort465) {
+  // Use SendGrid (works on all hosting platforms)
+  if (process.env.SENDGRID_API_KEY) {
     return nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
+      host: 'smtp.sendgrid.net',
+      port: 587,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 10000,
-      tls: {
-        rejectUnauthorized: false
+        user: 'apikey',
+        pass: process.env.SENDGRID_API_KEY
       }
     });
   }
   
-  // Default: Use service shorthand (tries multiple ports automatically)
+  // Fallback to Gmail (local development only)
   return nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS
-    },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000
+    }
   });
 };
 
