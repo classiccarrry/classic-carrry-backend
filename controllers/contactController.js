@@ -49,6 +49,7 @@ export const submitContact = async (req, res) => {
     // Send confirmation email to user
     try {
       console.log('📧 Attempting to send email...');
+      console.log('SENDGRID_API_KEY:', process.env.SENDGRID_API_KEY ? 'Set ✓' : 'Missing ✗');
       console.log('EMAIL_USER:', process.env.EMAIL_USER ? 'Set ✓' : 'Missing ✗');
       console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? 'Set ✓' : 'Missing ✗');
       
