@@ -7,10 +7,14 @@ const createTransporter = () => {
   if (process.env.SENDGRID_API_KEY) {
     return nodemailer.createTransport({
       host: 'smtp.sendgrid.net',
-      port: 587,
+      port: 465,
+      secure: true,
       auth: {
         user: 'apikey',
         pass: process.env.SENDGRID_API_KEY
+      },
+      tls: {
+        rejectUnauthorized: false
       }
     });
   }
