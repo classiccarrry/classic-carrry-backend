@@ -54,9 +54,10 @@ export const submitContact = async (req, res) => {
       console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? 'Set ✓' : 'Missing ✗');
       
       const transporter = createTransporter();
+      console.log('📬 Using transporter:', process.env.SENDGRID_API_KEY ? 'SendGrid' : 'Gmail');
       
       const userMailOptions = {
-        from: process.env.EMAIL_USER,
+        from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
         to: email,
         subject: 'Thank you for contacting Classic Carrry',
         html: `
@@ -90,11 +91,15 @@ export const submitContact = async (req, res) => {
         `
       };
 
-      await transporter.sendMail(userMailOptions);
-      console.log('✅ Confirmation email sent successfully to:', email);
+      console.log('📤 Sending email to:', email);
+      const result = await transporter.sendMail(userMailOptions);
+      console.log('✅ Email sent successfully! Message ID:', result.messageId);
     } catch (emailError) {
-      console.error('❌ Error sending confirmation email:', emailError.message);
-      console.error('Full error:', emailError);
+      console.error('❌ Email failed:', emailError.message);
+      if (emailError.response) {
+        console.error('Response:', emailError.response);
+      }
+      console.error('Error code:', emailError.code);
       // Don't fail the request if email fails
     }
 

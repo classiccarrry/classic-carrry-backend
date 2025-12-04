@@ -48,23 +48,15 @@ export const createOrder = async (req, res) => {
       );
     }
 
-    // Send email notifications
+    // Send email notification to customer only
     try {
-      // Send confirmation email to customer
       await sendEmail({
         to: customer.email,
         subject: `Order Confirmation - ${order.orderNumber} | Classic Carrry`,
         html: customerOrderConfirmation(order)
       });
 
-      // Send notification email to owner
-      await sendEmail({
-        to: process.env.OWNER_EMAIL || 'classiccarrry@gmail.com',
-        subject: `🔔 New Order Received - ${order.orderNumber}`,
-        html: ownerOrderNotification(order)
-      });
-
-      console.log('✅ Order confirmation emails sent successfully');
+      console.log('✅ Order confirmation email sent to customer');
     } catch (emailError) {
       console.error('❌ Email sending failed:', emailError.message);
       // Don't fail the order creation if email fails
