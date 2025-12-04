@@ -1,16 +1,8 @@
 import Contact from '../models/Contact.js';
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 
-// Create email transporter
-const createTransporter = () => {
-  return nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    }
-  });
-};
+// Initialize SendGrid
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // Submit contact form
 export const submitContact = async (req, res) => {
@@ -35,11 +27,12 @@ export const submitContact = async (req, res) => {
 
     // Send confirmation email to user
     try {
-      const transporter = createTransporter();
-      
-      const userMailOptions = {
-        from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+      const msg = {
         to: email,
+        from: {
+          email: process.env.EMAIL_FROM,
+          name: process.env.EMAIL_FROM_NAME || 'Classic Carrry'
+        },
         subject: 'Thank you for contacting Classic Carrry',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -72,10 +65,13 @@ export const submitContact = async (req, res) => {
         `
       };
 
-      await transporter.sendMail(userMailOptions);
-      console.log('✅ Confirmation email sent');
+      await sgMail.send(msg);
+      console.log('✅ Confirmation email sent via SendGrid');
     } catch (emailError) {
       console.error('❌ Error sending email:', emailError.message);
+      if (emailError.response) {
+        console.error('SendGrid error:', emailError.response.body);
+      }
       // Don't fail the request if email fails
     }
 
@@ -205,11 +201,12 @@ export const replyToContact = async (req, res) => {
 
     // Send reply email
     try {
-      const transporter = createTransporter();
-      
-      const replyMailOptions = {
-        from: process.env.EMAIL_USER,
+      const replyMsg = {
         to: contact.email,
+        from: {
+          email: process.env.EMAIL_FROM,
+          name: process.env.EMAIL_FROM_NAME || 'Classic Carrry'
+        },
         subject: `Re: ${contact.subject}`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -240,7 +237,7 @@ export const replyToContact = async (req, res) => {
         `
       };
 
-      await transporter.sendMail(replyMailOptions);
+      await sgMail.send(replyMsg);
 
       // Update contact
       contact.replied = true;

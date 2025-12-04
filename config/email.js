@@ -1,34 +1,29 @@
-import pkg from 'nodemailer';
-const { createTransport } = pkg;
+import sgMail from '@sendgrid/mail';
 
-// Create reusable transporter
-const createTransporter = () => {
-  return createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    }
-  });
-};
+// Initialize SendGrid
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 export const sendEmail = async (options) => {
   try {
-    const transporter = createTransporter();
-
-    const mailOptions = {
-      from: `${process.env.EMAIL_FROM_NAME} <${process.env.EMAIL_FROM}>`,
+    const msg = {
       to: options.to,
+      from: {
+        email: process.env.EMAIL_FROM,
+        name: process.env.EMAIL_FROM_NAME || 'Classic Carrry'
+      },
       subject: options.subject,
       html: options.html,
       text: options.text
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Email sent:', info.messageId);
-    return info;
+    const result = await sgMail.send(msg);
+    console.log('✅ Email sent via SendGrid:', result[0].statusCode);
+    return result;
   } catch (error) {
-    console.error('❌ Email error:', error.message);
+    console.error('❌ SendGrid error:', error.message);
+    if (error.response) {
+      console.error('Response body:', error.response.body);
+    }
     throw error;
   }
 };

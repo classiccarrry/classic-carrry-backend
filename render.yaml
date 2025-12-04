@@ -7,34 +7,22 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 5000
       - key: MONGODB_URI
         sync: false
       - key: JWT_SECRET
         sync: false
       - key: JWT_EXPIRE
         value: 30d
-      - key: ADMIN_URL
-        sync: false
-      - key: USER_URL
-        sync: false
-      - key: EMAIL_USER
-        sync: false
-      - key: EMAIL_PASS
+      - key: SENDGRID_API_KEY
         sync: false
       - key: EMAIL_FROM
         sync: false
       - key: EMAIL_FROM_NAME
         value: Classic Carrry
-      - key: OWNER_EMAIL
+      - key: ADMIN_URL
         sync: false
-      - key: SMTP_HOST
-        value: smtp.gmail.com
-      - key: SMTP_PORT
-        value: 587
-      - key: SMTP_SECURE
-        value: false
+      - key: USER_URL
+        sync: false
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
       - key: CLOUDINARY_API_KEY
