@@ -3,23 +3,6 @@ import nodemailer from 'nodemailer';
 
 // Create email transporter
 const createTransporter = () => {
-  // Use SendGrid (works on all hosting platforms)
-  if (process.env.SENDGRID_API_KEY) {
-    return nodemailer.createTransport({
-      host: 'smtp.sendgrid.net',
-      port: 465,
-      secure: true,
-      auth: {
-        user: 'apikey',
-        pass: process.env.SENDGRID_API_KEY
-      },
-      tls: {
-        rejectUnauthorized: false
-      }
-    });
-  }
-  
-  // Fallback to Gmail (local development only)
   return nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -52,13 +35,7 @@ export const submitContact = async (req, res) => {
 
     // Send confirmation email to user
     try {
-      console.log('📧 Attempting to send email...');
-      console.log('SENDGRID_API_KEY:', process.env.SENDGRID_API_KEY ? 'Set ✓' : 'Missing ✗');
-      console.log('EMAIL_USER:', process.env.EMAIL_USER ? 'Set ✓' : 'Missing ✗');
-      console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? 'Set ✓' : 'Missing ✗');
-      
       const transporter = createTransporter();
-      console.log('📬 Using transporter:', process.env.SENDGRID_API_KEY ? 'SendGrid' : 'Gmail');
       
       const userMailOptions = {
         from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
@@ -95,15 +72,10 @@ export const submitContact = async (req, res) => {
         `
       };
 
-      console.log('📤 Sending email to:', email);
-      const result = await transporter.sendMail(userMailOptions);
-      console.log('✅ Email sent successfully! Message ID:', result.messageId);
+      await transporter.sendMail(userMailOptions);
+      console.log('✅ Confirmation email sent');
     } catch (emailError) {
-      console.error('❌ Email failed:', emailError.message);
-      if (emailError.response) {
-        console.error('Response:', emailError.response);
-      }
-      console.error('Error code:', emailError.code);
+      console.error('❌ Error sending email:', emailError.message);
       // Don't fail the request if email fails
     }
 

@@ -3,25 +3,6 @@ const { createTransport } = pkg;
 
 // Create reusable transporter
 const createTransporter = () => {
-  // Use SendGrid (works on all hosting platforms)
-  if (process.env.SENDGRID_API_KEY) {
-    console.log('📬 Using SendGrid for email');
-    return createTransport({
-      host: 'smtp.sendgrid.net',
-      port: 465,
-      secure: true,
-      auth: {
-        user: 'apikey',
-        pass: process.env.SENDGRID_API_KEY
-      },
-      tls: {
-        rejectUnauthorized: false
-      }
-    });
-  }
-  
-  // Fallback to Gmail (local development only)
-  console.log('📬 Using Gmail for email');
   return createTransport({
     service: 'gmail',
     auth: {
