@@ -24,7 +24,7 @@ Backend API for Classic Carrry e-commerce platform built with Node.js, Express, 
 - **Mongoose** - ODM
 - **JWT** - Authentication
 - **Cloudinary** - Image storage
-- **Nodemailer** - Email service
+- **SendGrid** - Email service (Web API)
 - **Bcrypt** - Password hashing
 
 ## 📁 Project Structure
@@ -48,7 +48,7 @@ backend/
 - Node.js 18+
 - MongoDB (local or Atlas)
 - Cloudinary account
-- Gmail account
+- SendGrid account (free tier)
 
 ### Installation
 
@@ -64,12 +64,26 @@ backend/
 
 3. **Configure environment variables:**
    ```env
+   NODE_ENV=development
+   PORT=5000
+   
+   # Database
    MONGODB_URI=mongodb://localhost:27017/classiccarrry
+   
+   # JWT
    JWT_SECRET=your_secret_key
+   JWT_EXPIRE=30d
+   
+   # Frontend URLs (for CORS)
    ADMIN_URL=http://localhost:5173
    USER_URL=http://localhost:5174
-   EMAIL_USER=your-email@gmail.com
-   EMAIL_PASS=your-gmail-app-password
+   
+   # SendGrid Email
+   SENDGRID_API_KEY=SG.your-sendgrid-api-key
+   EMAIL_FROM=your-verified-email@gmail.com
+   EMAIL_FROM_NAME=Classic Carrry
+   
+   # Cloudinary
    CLOUDINARY_CLOUD_NAME=your_cloud_name
    CLOUDINARY_API_KEY=your_api_key
    CLOUDINARY_API_SECRET=your_api_secret
@@ -174,11 +188,19 @@ Backend accepts requests from:
 
 ## 📧 Email Notifications
 
+**Using SendGrid Web API** (HTTPS - works on all hosting platforms)
+
 Automatic emails sent for:
 - Order confirmation (to customer)
-- New order notification (to owner)
 - Order status updates
 - Contact form submissions
+- Admin replies to contacts
+
+**Setup:**
+1. Sign up at https://sendgrid.com (free - 100 emails/day)
+2. Create API key with Mail Send permission
+3. Verify sender email in SendGrid
+4. Add `SENDGRID_API_KEY` to environment variables
 
 ## 🖼️ Image Storage
 
@@ -194,9 +216,47 @@ Automatic emails sent for:
 - CORS configuration
 - Input validation
 
-## 🚀 Deployment
+## 🚀 Deployment on Render
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
+### Quick Deploy
+
+1. **Push to GitHub:**
+   ```bash
+   git add .
+   git commit -m "Deploy backend"
+   git push
+   ```
+
+2. **Create Render Service:**
+   - Go to https://dashboard.render.com/
+   - New → Web Service
+   - Connect GitHub repo
+   - Root Directory: `backend`
+   - Build: `npm install`
+   - Start: `npm start`
+
+3. **Add Environment Variables:**
+   ```
+   NODE_ENV=production
+   PORT=5000
+   MONGODB_URI=your-mongodb-atlas-uri
+   JWT_SECRET=your-secret-key
+   JWT_EXPIRE=30d
+   SENDGRID_API_KEY=SG.your-api-key
+   EMAIL_FROM=your-verified-email@gmail.com
+   EMAIL_FROM_NAME=Classic Carrry
+   ADMIN_URL=https://your-admin.vercel.app
+   USER_URL=https://www.classiccarrry.com
+   CLOUDINARY_CLOUD_NAME=your-cloud-name
+   CLOUDINARY_API_KEY=your-api-key
+   CLOUDINARY_API_SECRET=your-api-secret
+   ```
+
+4. **Deploy!**
+
+**Important:** If using custom domain, add it to `USER_URL` and `ADMIN_URL` to fix CORS.
+
+See [SENDGRID_RENDER_SETUP.md](../SENDGRID_RENDER_SETUP.md) for detailed email setup.
 
 ## 📞 Support
 

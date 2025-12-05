@@ -118,11 +118,26 @@ export const validateCoupon = async (req, res) => {
 // Create coupon
 export const createCoupon = async (req, res) => {
   try {
+    console.log('Creating coupon with data:', req.body);
     const coupon = new Coupon(req.body);
     await coupon.save();
     res.status(201).json({ success: true, data: coupon });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    console.error('Coupon creation error:', error);
+    
+    // Handle duplicate coupon code error
+    if (error.code === 11000) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Coupon code already exists. Please use a different code.'
+      });
+    }
+    
+    // Handle validation errors
+    res.status(400).json({ 
+      success: false, 
+      message: error.message || 'Failed to create coupon'
+    });
   }
 };
 
@@ -139,6 +154,14 @@ export const updateCoupon = async (req, res) => {
     }
     res.json({ success: true, data: coupon });
   } catch (error) {
+    // Handle duplicate coupon code error
+    if (error.code === 11000) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Coupon code already exists. Please use a different code.'
+      });
+    }
+    
     res.status(400).json({ success: false, message: error.message });
   }
 };
